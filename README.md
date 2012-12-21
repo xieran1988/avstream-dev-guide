@@ -111,6 +111,7 @@ libx264 的简单编码
     }
 
 输出为
+
     x264 [debug]: using mv_range_thread = 24
     x264 [info]: using cpu capabilities: MMX2 SSE2Fast SSSE3 FastShuffle SSE4.2
     x264 [info]: profile Constrained Baseline, level 3.0
@@ -131,4 +132,5 @@ libx264 的简单编码
     x264 [debug]: frame=   2 QP=5.00 NAL=2 Slice:P Poc:4   I:76   P:159  SKIP:685  size=14991 bytes
     #9 encode=14991
     #9 payload len=14991 data=0xb73aa020
+    
 可以观察到，x264 在第 7 帧的时候真正开始编码，也许是需要预测之类的吧。
