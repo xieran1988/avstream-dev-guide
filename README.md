@@ -209,3 +209,16 @@ http://hi.baidu.com/rhzrfwwrtojsvxr/item/220262e3d1ccc9f5e0a5d4da 这里有更�
     
 可以观察到，x264 在第 7 帧的时候真正开始编码，因为 x264 编码是需要一开始积攒几帧然后再做一些预测类的处理，才能输出。
 
+解码后再编码
+----
+libav 与 libx264 的数据结构对应关系为
+
+        	picin.img.i_stride[0] = frm->linesize[0];
+    		picin.img.i_stride[1] = frm->linesize[1];
+    		picin.img.i_stride[2] = frm->linesize[2];
+            
+            picin.img.plane[0] = frm->data[0];
+    		picin.img.plane[1] = frm->data[1];
+    		picin.img.plane[2] = frm->data[2];
+
+frm 为 AVFrame 类型。
