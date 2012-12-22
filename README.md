@@ -1,3 +1,20 @@
+环境配置
+----
+我们在 ubuntu 下进行开发，本文所有命令都只针对 ubuntu，请安装最新版的 ubuntu。
+首先安装开发所需要的包：
+
+    apt-get install build-essential cmake
+    apt-get install libavcodec-dev libavformat-dev libavdevice-dev libavfilter-dev libx264-dev
+
+也可以自行下载 libav 的代码进行手动安装。
+
+在编译和链接相关代码的时候，推荐大家使用 cmake 进行编译，因为库比较多，用 cmake 管理会简单得多。不然 Makefile 写起来太麻烦了，libav 的每个库又依赖与其他的库，难以处理。再次声明：*ubuntu 一定要最新版的*，不然 cmake 可能找不到 libav 的库。
+
+本文给出的所有范例代码，都是一个目录，里面有一个 CMakeList.txt 和一些 c 代码。编译的命令为：
+
+    cmake .
+    make
+
 打开一个 mp4 文件
 -----
 
@@ -45,15 +62,19 @@
     }
     
 代码编译之后的输出为
+
     opening 1.mp4
     open 0, nb_streams: 2
     h264
     aac
     codec_open 0
+
 可见 1.mp4 中有两个流，一个是 aac 流，一个是 h264 流。目前流行的封装就是如此。
 
 读取视频帧
 ----
+
+
 
 libx264 的简单编码
 ----
