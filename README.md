@@ -131,6 +131,11 @@ libx264 的简单编码
     	}
     }
 
+i_stride[0], i_stride[1], i_stride[2] 分别指向图像的 Y，U，V 原始数据。在 h264 的编码中默认使用的就是 I420 形式的原始数据。特点如下：
+![Alt text](yplane.gif)
+![Alt text](u2plane.gif)
+![Alt text](v2plane.gif)
+
 输出为
 
     x264 [debug]: using mv_range_thread = 24
