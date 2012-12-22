@@ -106,7 +106,6 @@ libx264 的简单编码
     	for (n = 0; n < 10; n++) {
     		x264_picture_t picin, picout;
     		memset(&picin, 0, sizeof(picin));
-    		// TODO: 我还没有搞明白 YUV 的 linesize 换算关系
     		picin.img.i_stride[0] = sizeof(ydata);
     		picin.img.i_stride[1] = sizeof(udata);
     		picin.img.i_stride[2] = sizeof(vdata);
@@ -114,7 +113,7 @@ libx264 的简单编码
     		picin.img.plane[1] = udata;
     		picin.img.plane[2] = vdata;
     		picin.img.i_csp = X264_CSP_I420;
-    		// TODO: 弄明白 pts 的单位
+    		// TODO: pts 的单位是什么？
     		picin.i_pts = n*10000;
     
     		x264_nal_t *nal;
@@ -131,12 +130,17 @@ libx264 的简单编码
     	}
     }
 
-i_stride[0], i_stride[1], i_stride[2] 分别指向图像的 Y，U，V 原始数据。在 h264 的编码中默认使用的就是 I420 形式的原始数据。特点如下：
-![Alt text](yplane.gif)
-![Alt text](u2plane.gif)
-![Alt text](v2plane.gif)
+plane 数组分别指向图像的 Y，U，V 原始数据。在 h264 的编码中默认使用的就是 I420 形式的原始数据。特点如下：
+![](yplane.gif?raw=true)
+![](u2plane.gif?raw=true)
+![](v2plane.gif?raw=true)
+http://www.fourcc.org/yuv.php#IYUV 这里有更详细的解释。
+i_stride 数组分别保存了 Y，U，V 数据的大小。这个大小应该怎么计算呢？
 
-输出为
+    i_stride = ( ( h->param.i_width + 15 )&0xfffff0 )+ 64; //宽度352+64=416
+
+http://hi.baidu.com/rhzrfwwrtojsvxr/item/220262e3d1ccc9f5e0a5d4da 这里有更详细的解释。由于 x264 库需要额外保存一些东西，数组要开大一点。
+程序输出为
 
     x264 [debug]: using mv_range_thread = 24
     x264 [info]: using cpu capabilities: MMX2 SSE2Fast SSSE3 FastShuffle SSE4.2
