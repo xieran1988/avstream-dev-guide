@@ -74,6 +74,37 @@
 读取视频帧
 ----
 
+        int n = 0;
+    	for (n = 0; n < 10; n++) {
+    		AVPacket pkt;
+    		int i = av_read_frame(ifc, &pkt);
+    		printf("read %d, pkt: size=%d index=%d\n", i, pkt.size, pkt.stream_index);
+    		if (pkt.stream_index != st->index)
+    			continue;
+    		int got_pic; 
+    		i = avcodec_decode_video2(st->codec, frm, &got_pic, &pkt);
+    		printf("decode %d, w=%d h=%d\n", i, frm->width, frm->height);
+    		if (got_pic && frm->key_frame)
+    			break;
+
+pkt 中保存的是视频文件中的帧，可能是音频帧，也可能是视频帧。如果是原始的 h264 帧，调用解码函数。
+
+如果解码后有图像生成，则 got_pic 为 1。因为 h264 不一定每帧都是保存图像的，有可能保存别的信息。
+
+frm 保存了解码后图像的信息。如果是关键帧，那么 key_frame 为 1。
+
+获取所有关键帧的位置
+----
+
+        AVStream *st = st_h264;
+    	int i, r;
+    
+    	printf("nb_index_entries: %d\n", st->nb_index_entries); 
+    	for (i = 0; i < st->nb_index_entries; i++) {
+    		AVIndexEntry *ie = &st->index_entries[i];
+    		printf("#%d pos=%lld ts=%lld\n", i, ie->pos, ie->timestamp);
+    	}
+
 
 
 libx264 的简单编码
