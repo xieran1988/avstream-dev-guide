@@ -222,3 +222,20 @@ libav 与 libx264 的数据结构对应关系为
     		picin.img.plane[2] = frm->data[2];
 
 frm 为 AVFrame 类型。
+
+rtmp 简介
+----
+简单的说，rtmp 服务器就是一个电视台，有多个频道。在服务器端，多个视频提供者。macromedia 官方的 Flash Media Server 里面包含了“电视台”和“视频提供者”两个组件。客户端就是 Flash Player，每个浏览器都有，协议也都一致。
+
+在开源项目中，推荐使用 nginx rtmp-module 和 libav 作为“电视台”和“视频提供者”。这两个开源项目相当稳定和成熟，而且便于部署。我曾经使用过 gstreamer，但发现比较难弄，因为 gstreamr 是属于 freedesktop 项目的东西，严重依赖于 glib 底层结构，导致它的代码虽然是用 C 写的，但是比 C++ 还难懂，用起来相当麻烦。
+
+nginx 是一个 http 服务器，有人专门为它开发了一个模块用于 rtmp 的转发，如果正好要做流媒体的 web 应用，选择 nginx 就是一举两得。
+
+libav 中的 avconv 命令可以方便的将任何视频封转发成 rtmp 流。
+
+安装 nginx rtmp-module
+----
+
+
+
+
