@@ -337,7 +337,71 @@ libav 中的 avconv 命令可以方便的将任何视频封转发成 rtmp 流。
         }
     }
     
+使用 avconv 命令发送视频给 nginx-rtmp-module
+----
 
+    avconv -re -i a.mp4 -c:a copy -c:v copy -f flv rtmp://localhost/myapp/1
+
+其中 `-re` 参数，man avconv 给出的解释是“Read input at native frame rate. Mainly used to simulate a grab device.”
+
+`-f flv` 参数的意思是改变封装格式为 flv，以便输出到 rtmp。
+
+`-c:a copy` 参数的意思是保持音频编码器不变，就是只是改变最外层的格式封装（由 mp4 改为 flv），不重新编码。原来是 aac 格式，现在还是 aac 格式。
+
+`-c:v copy` 参数的指的是视频。保持 h264 格式不变。
+
+`rtmp://localhost/myapp/1` 这个 url 跟上面 nginx.conf 的里面的 application myapp 起头的那行，对应起来了。
+
+此外 avconv 是一个很强大的命令，可以指定从那一秒开始播放文件，也可以改变视频的大小，也可以加一些滤镜效果。
+
+在网页上接收 rtmp 流
+----
+需要 Flash Player 的支持。但是各大浏览器全部都支持 Flash Player，而且 rtmp 又是比较老的技术，所以不用担心播放不了的情况。
+可以使用封装好了的 jwplayer 。jwplayer 是一个网页 flash 视频播放器开源项目，能够通过 javascript 很方便的嵌入播放器，以及调整大小之类的操作。
+
+首先在 [这里](https://github.com/luminosity-group/jwplayer) git clone 一份 jwplayer
+
+    git clone https://github.com/luminosity-group/jwplayer
+    
+然后从 jwplayer 下面复制 jwplayer.min.js 和 player.swf 出来。
+
+网页代码如下
+
+    <script type="text/javascript" src="jwplayer.min.js"></script>
+    <script >
+        function setup(file) {
+    		jwplayer("container").setup({
+    			'width': '720px',
+    			'height': '576px',
+    			'controlbar': 'none',
+    			'logo.hide': true,
+    			events: {
+    			},
+    			modes: [{
+    				type: "flash",
+    				src: "player.swf",
+    				config: {
+    					'viral.onpause': false,
+    					'autostart': true,
+    					'viral.oncomplete': false,
+    					'stretching':'none',
+    					smoothing:false,
+    					file: file,
+    					streamer: "rtmp://192.168.1.66/myapp",
+    					provider: "rtmp",
+    				}
+    			}]
+    		});
+    	}
+        setup(1);
+    </script>
+    <div id="container">
+    	Loading the player ...
+    </div>
+
+setup 函数的参数中。`logo.hide` 是设置是否隐藏播放器右下角的 logo。controlbar 是设置是否显示进度条。streamer 的地址指向我们的服务器地址。file 是频道名称。
+
+先使用刚刚那段 avconv 的脚本创建频道1。然后再打开网页，就可以看到有视频在直播了。
 
 
 
