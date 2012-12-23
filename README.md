@@ -227,14 +227,116 @@ rtmp 简介
 ----
 简单的说，rtmp 服务器就是一个电视台，有多个频道。在服务器端，多个视频提供者。macromedia 官方的 Flash Media Server 里面包含了“电视台”和“视频提供者”两个组件。客户端就是 Flash Player，每个浏览器都有，协议也都一致。
 
-在开源项目中，推荐使用 nginx rtmp-module 和 libav 作为“电视台”和“视频提供者”。这两个开源项目相当稳定和成熟，而且便于部署。我曾经使用过 gstreamer，但发现比较难弄，因为 gstreamr 是属于 freedesktop 项目的东西，严重依赖于 glib 底层结构，导致它的代码虽然是用 C 写的，但是比 C++ 还难懂，用起来相当麻烦。
+在开源项目中，推荐使用 nginx-rtmp-module 和 libav 作为“电视台”和“视频提供者”。这两个开源项目相当稳定和成熟，而且便于部署。我曾经使用过 gstreamer，但发现比较难弄，因为 gstreamr 是属于 freedesktop 项目的东西，严重依赖于 glib 底层结构，导致它的代码虽然是用 C 写的，但是比 C++ 还难懂，用起来相当麻烦。
 
 nginx 是一个 http 服务器，有人专门为它开发了一个模块用于 rtmp 的转发，如果正好要做流媒体的 web 应用，选择 nginx 就是一举两得。
 
 libav 中的 avconv 命令可以方便的将任何视频封转发成 rtmp 流。
 
-安装 nginx rtmp-module
+安装 nginx-rtmp-module
 ----
+项目地址在 [这儿](https://github.com/arut/nginx-rtmp-module)。推荐先看一下它的 README。
+
+下载 nginx 的源码，并添加 nginx-rtmp-module 模块
+
+    git clone https://github.com/arut/nginx-rtmp-module
+    apt-get build-dep nginx
+    apt-get source nginx
+    cd nginx-1.0.5/
+    ./configure --prefix=/usr --add-module=../nginx-rtmp-module
+    make
+    make install
+    
+编译安装完之后，将 /etc/nginx.conf 修改如下：
+
+    worker_processes  1;
+    
+    error_log  logs/error.log debug;
+    
+    
+    events {
+        worker_connections  1024;
+    }
+    
+    http {
+    
+        server {
+    
+            listen      8080;
+    
+            location /publish {
+                return 201;
+            }
+    
+            location /play {
+                return 202;
+            }
+    
+            location /record_done {
+                return 203;
+            }
+    
+            location /stat {
+                rtmp_stat all;
+                rtmp_stat_stylesheet stat.xsl;
+            }
+    
+            location /stat.xsl {
+                root /tmp/;
+            }
+    
+            location /rtmp-publisher {
+                root /tmp/test;
+            }
+    
+            location / {
+                root /tmp/test/www;
+            }
+    
+        }
+    }
+    
+    rtmp {
+    
+        server {
+    
+            listen 1935;
+    
+            chunk_size 128;
+    
+            publish_time_fix off;
+    
+            application myapp {
+    
+                live on;
+    
+                record keyframes;
+                record_path /tmp;
+    
+                record_max_size 128K;
+                record_interval 30s;
+    
+                record_suffix .this.is.flv;
+    
+                on_publish http://localhost:8080/publish;
+                on_play http://localhost:8080/play;
+                on_record_done http://localhost:8080/record_done;
+            }
+    
+            application myapp2 {
+                live on;
+            }
+    
+            application mypull {
+                live on;
+            }
+    
+            application mypush {
+                live on;
+            }
+        }
+    }
+    
 
 
 
