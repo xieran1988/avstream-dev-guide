@@ -403,5 +403,37 @@ setup 函数的参数中。`logo.hide` 是设置是否隐藏播放器右下角�
 
 先使用刚刚那段 avconv 的脚本创建频道1。然后再打开网页，就可以看到有视频在直播了。
 
+在直播中循环播放视频
+----
 
+值得一提的是，采用 rtmp 做网页直播非常方便。在直播一段视频的时候，如果遇到以下情况：
+
+* 视频文件需要切换
+* 视频的大小和帧率都会发生改变
+
+采用 rtmp 做服务器则不会出问题。avconv 进程退出后，频道会被释放，客户端的画面会马上停止，然后变成黑屏。再启动一个 avconv 进程，则直播会继续。
+视频的大小帧率发生改变不用另外写代码处理，jwplayer 也不会受到影响，视频大小无论是多少，画面始终居中。
+
+那么我们可以在直播中一直循环播放一些视频文件。只需要在后台不停的使用 avconv 发送视频流给 rtmp 服务器即可。脚本如下：
+
+    while true; do
+        avconv -re -i a.mp4 -c:a copy -c:v copy -f flv rtmp://localhost/myapp/1
+        avconv -re -i b.mp4 -c:a copy -c:v copy -f flv rtmp://localhost/myapp/1
+    done
+    
+这段代码在 a.mp4 播放完之后接着播放 b.mp4。不停止的一直播放下去。a.mp4 和 b.mp4 的大小和帧率不一样也没有任何问题。
+
+切换频道
+----
+
+    avconv -re -i a.mp4 -c:a copy -c:v copy -f flv rtmp://localhost/myapp/1 &
+    avconv -re -i b.mp4 -c:a copy -c:v copy -f flv rtmp://localhost/myapp/2 &
+
+这样写的话，则分别在 频道1 和 频道2 播放 a.mp4 和 b.mp4。如果要在网页上添加多个按钮来选择频道，应该怎么做呢？
+用 javascript 可以很方便的控制它们。
+
+    <button onclick="setup(1)" >channel 1</button>
+    <button onclick="setup(2)" >channel 2</button>
+
+在刚刚的页面上加上这段代码就可以了。简单的来说，切换频道就是重新新建一次 jwplayer 播放器。它应该还更好的方法，有待研究。
 
